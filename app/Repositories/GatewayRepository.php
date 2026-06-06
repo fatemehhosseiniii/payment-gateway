@@ -10,6 +10,12 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class GatewayRepository implements RepositoryInterface
 {
+
+    public function __construct(public ArrayCrypt $arrayCrypt)
+    {
+        //
+    }
+
     public function getList(array $filterData): LengthAwarePaginator
     {
         $gateways = Gateway::query();
@@ -27,8 +33,7 @@ class GatewayRepository implements RepositoryInterface
 
     public function create(array $data): Gateway
     {
-        $arrayCrypt = new ArrayCrypt($data['params'] ?? []);
-        $data['params'] = $arrayCrypt->encrypt();
+        $data['params'] = $this->arrayCrypt->encrypt($data['params'] ?? []);
 
         $gateway = Gateway::updateOrCreate(['key' => $data['key']], $data);
 
@@ -39,8 +44,7 @@ class GatewayRepository implements RepositoryInterface
     public function update(Gateway|Model $model, array $data): Gateway
     {
         if (isset($data['params'])) {
-            $arrayCrypt = new ArrayCrypt($data['params'] ?? []);
-            $data['params'] = $arrayCrypt->encrypt();
+            $data['params'] = $this->arrayCrypt->encrypt($data['params'] ?? []);
         }
 
         $model->update($data);

@@ -14,11 +14,10 @@ use Illuminate\Http\Request;
 
 class GatewayController extends Controller
 {
-    public GatewayRepository $gatewayRepository;
 
-    public function __construct()
+    public function __construct(public GatewayRepository $gatewayRepository)
     {
-        $this->gatewayRepository = new GatewayRepository();
+        //
     }
 
     /**

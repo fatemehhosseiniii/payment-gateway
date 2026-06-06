@@ -7,15 +7,9 @@ use Illuminate\Support\Facades\Crypt;
 class ArrayCrypt
 {
 
-    public function __construct(public array $params)
+    public function encrypt(array $data): array
     {
-        //
-    }
-
-    public function encrypt(): array
-    {
-        $data = [];
-        foreach ($this->params as $key => $value) {
+        foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $data[$key] = $this->encrypt($value);
             } else {
@@ -25,12 +19,11 @@ class ArrayCrypt
         return $data;
     }
 
-    function decryptValues(): array
+    function decrypt(array $data): array
     {
-        $data = [];
-        foreach ($this->params as $key => $value) {
+        foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $data[$key] = $this->decryptValues($value);
+                $data[$key] = $this->decrypt($value);
             } else {
                 $data[$key] = Crypt::decryptString($value);
             }

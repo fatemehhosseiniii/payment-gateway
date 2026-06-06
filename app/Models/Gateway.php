@@ -15,7 +15,7 @@ class Gateway extends Model
     {
         return [
             'is_active' => 'boolean',
-            'params' => 'json',
+            'params' => 'array',
         ];
     }
 }
