@@ -25,13 +25,27 @@ class GatewayRepository implements RepositoryInterface
         return $gateways->paginate(self::paginatePerPage);
     }
 
-    public function save(array $data): Gateway
+    public function create(array $data): Gateway
     {
         $arrayCrypt = new ArrayCrypt($data['params'] ?? []);
         $data['params'] = $arrayCrypt->encrypt();
 
-        return Gateway::updateOrCreate(['key' => $data['key']], $data);
+        $gateway = Gateway::updateOrCreate(['key' => $data['key']], $data);
 
+        $gateway->refresh();
+        return $gateway;
+    }
+
+    public function update(Gateway|Model $model, array $data): Gateway
+    {
+        if (isset($data['params'])) {
+            $arrayCrypt = new ArrayCrypt($data['params'] ?? []);
+            $data['params'] = $arrayCrypt->encrypt();
+        }
+
+        $model->update($data);
+        $model->refresh();
+        return $model;
     }
 
     public function delete(Model $model): void

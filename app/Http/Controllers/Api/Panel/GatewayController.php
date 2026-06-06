@@ -44,7 +44,7 @@ class GatewayController extends Controller
     public function store(GatewayRequest $request): JsonResponse
     {
         //save
-        $gateway = $this->gatewayRepository->save($request->validated());
+        $gateway = $this->gatewayRepository->create($request->validated());
         //return Result Message
         return Response::success(['gateway' => $gateway->toResource()]);
     }
@@ -55,10 +55,10 @@ class GatewayController extends Controller
      * @param $gateway
      * @return JsonResponse
      */
-    public function update(GatewayRequest $request, $gateway)
+    public function update(GatewayRequest $request, Gateway $gateway)
     {
         //save
-        $gateway = $this->gatewayRepository->Save($request->validated());
+        $gateway = $this->gatewayRepository->update($gateway, $request->validated());
         //return Result Message
         return Response::success(['gateway' => $gateway->toResource()]);
     }

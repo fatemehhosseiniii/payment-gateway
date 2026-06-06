@@ -23,21 +23,24 @@ class GatewayRequest extends FormRequest
      */
     public function rules(): array
     {
-        //basic rules for Filtering list
-        $rules = [];
+        return match ($this->method()) {
 
-        //check method Request for change rule to forms
-        if ($this->method() != 'GET') {
-            $rules = [
+            'GET' => [],
+
+            'POST', 'PUT' => [
                 'title' => ['required', 'string', 'max:30'],
-                'key' => ['required', 'alpha', 'max:15', 'unique:gateways,key,' . $this->route('gateway')],
+                'key' => ['required', 'alpha', 'max:15', 'unique:gateways,key,' . ($this->route('gateway')['id'] ?? null)],
                 'params' => ['required', 'array'],
                 'params.*' => ['string'],
-            ];
+                'is_active' => ['nullable', 'boolean'],
+            ],
 
-            if ($this->method() == 'PATCH')
-                $rules['is_active'] = ['required', 'boolean'];
-        }
-        return $rules;
+            'PATCH' => [
+                'is_active' => ['required', 'boolean'],
+            ],
+
+            default => [],
+        };
+
     }
 }

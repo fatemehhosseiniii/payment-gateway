@@ -13,5 +13,7 @@ interface RepositoryInterface
 
     public function getList(array $filterData): LengthAwarePaginator;
 
-    public function save(array $data): Model;
+    public function create(array $data): Model;
+
+    public function update(Model $model, array $data): Model;
 }
