@@ -4,22 +4,23 @@ namespace App\Repositories;
 
 use App\Models\Gateway;
 use App\Services\ArrayCrypt;
-use App\Services\Response;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class GatewayRepository implements RepositoryInterface
+class GatewayRepository
 {
 
-    public function __construct(public ArrayCrypt $arrayCrypt)
+    public ArrayCrypt $arrayCrypt;
+
+    public function __construct()
     {
-        //
+        $this->arrayCrypt = new ArrayCrypt();
     }
 
     public function getActiveList(): Collection
     {
-        return Gateway::query()->where('is_active',true)->get();
+        return Gateway::query()->where('is_active', true)->get();
     }
 
     public function getList(array $filterData): LengthAwarePaginator
@@ -34,7 +35,12 @@ class GatewayRepository implements RepositoryInterface
         if (isset($filterData['is_active'])) {
             $gateways->where('is_active', $filterData['is_active']);
         }
-        return $gateways->paginate(self::paginatePerPage);
+        return $gateways->paginate(config('setting.paginate-per-page'));
+    }
+
+    public function find(string $key, string $value): Model
+    {
+        return Gateway::where($key, $value)->first();
     }
 
     public function create(array $data): Gateway

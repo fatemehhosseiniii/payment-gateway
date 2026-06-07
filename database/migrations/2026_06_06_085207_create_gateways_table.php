@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('title', 30);
             $table->string('key', 15)->unique()->index();
             $table->json('params')->nullable();
+            $table->float('max_amount')->nullable();
             $table->boolean('is_active')->default(true);
             $table->softDeletes();
             $table->timestamps();
