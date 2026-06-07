@@ -9,11 +9,11 @@ use App\Services\Response;
 use Illuminate\Support\Facades\Hash;
 use OpenApi\Attributes as OA;
 
-#[OA\Info(version: '1.0', title: 'Authenticated user')]
+
 class LoginController extends Controller
 {
     #[OA\Post(
-        path: '/auth/login',
+        path: '/api/auth/login',
         description: "Login Admin for manage gateways",
         requestBody: new OA\RequestBody(
             required: true,
@@ -35,8 +35,27 @@ class LoginController extends Controller
         ),
         tags: ["Auth"],
         responses: [
-            new OA\Response(response: 200, description: 'OK'),
-            new OA\Response(response: 401, description: 'Not allowed'),
+            new OA\Response(response: 200, description: 'OK', content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'status',
+                        type: 'string',
+                        example: 'success'
+                    ),
+                    new OA\Property(
+                        property: 'data',
+                        properties: [
+                            new OA\Property(
+                                property: 'token',
+                                type: 'string',
+                                example: '1|mNoR.....................'
+                            ),
+                        ],
+                        type: 'object'
+                    )
+                ]
+            )
+            ),
         ]
     )]
     public function __invoke(LoginRequest $request)
@@ -53,6 +72,6 @@ class LoginController extends Controller
             return Response::success(['token' => $token->plainTextToken]);
         }
 
-        return Response::error(__('auth.failed'),403);
+        return Response::error(__('auth.failed'), 403);
     }
 }

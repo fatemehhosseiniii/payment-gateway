@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Api\Paymeny;
 
+use App\Enums\PayRequestStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PayRequestRequest extends FormRequest
 {
@@ -24,7 +26,7 @@ class PayRequestRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'integer', 'min:1000'],
-            'order_code' => ['required', 'integer', 'digits_between:1,10'],
+            'order_code' => ['required', 'integer', 'digits_between:1,10',Rule::unique('pay_requests','order_code')->whereNotIn('status',[PayRequestStatus::Expired,PayRequestStatus::Fail])],
             'gateway_key' => ['required', 'string', 'exists:gateways,key'],
         ];
     }

@@ -25,7 +25,10 @@ class GatewayRequest extends FormRequest
     {
         return match ($this->method()) {
 
-            'GET' => [],
+            'GET' => [
+                'title' => ['nullable', 'string', 'max:30'],
+                'is_active' => ['nullable', 'boolean'],
+            ],
 
             'POST', 'PUT' => [
                 'title' => ['required', 'string', 'max:30'],

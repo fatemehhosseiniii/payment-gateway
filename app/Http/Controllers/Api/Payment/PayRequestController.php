@@ -10,6 +10,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class PayRequestController extends Controller
 {
@@ -20,6 +21,106 @@ class PayRequestController extends Controller
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      */
+    #[OA\Post(
+        path: '/api/payment/pay-request',
+        description: 'Pay request',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['amount', 'order_code', 'gateway_key'],
+                properties: [
+                    new OA\Property(
+                        property: 'amount',
+                        type: 'integer',
+                        example: 1500000
+                    ),
+                    new OA\Property(
+                        property: 'order_code',
+                        type: 'string',
+                        example: '124200'
+                    ),
+                    new OA\Property(
+                        property: 'gateway_key',
+                        type: 'string',
+                        example: 'shepa'
+                    ),
+                ]
+            )
+        ),
+
+        tags: ['Payment'],
+
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Success',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'string',
+                            example: 'success'
+                        ),
+                        new OA\Property(
+                            property: 'data',
+                            properties: [
+                                new OA\Property(
+                                    property: 'redirect_route',
+                                    type: 'string',
+                                    format: 'uri',
+                                    example: 'https://sandbox.shepa.com/v1/dc3006...............16a9235d'
+                                ),
+                                new OA\Property(
+                                    property: 'have_more_transaction',
+                                    type: 'boolean',
+                                    example: true
+                                ),
+                            ],
+                            type: 'object'
+                        ),
+                    ]
+                )
+            ),
+
+            new OA\Response(
+                response: 422,
+                description: 'Validation Error',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'string',
+                            example: 'error'
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'The amount field is required.'
+                        ),
+                    ]
+                )
+            ),
+
+            new OA\Response(
+                response: 404,
+                description: 'Gateway Not Found',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(
+                            property: 'status',
+                            type: 'string',
+                            example: 'error'
+                        ),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Gateway not found.'
+                        ),
+                    ]
+                )
+            ),
+        ]
+    )]
     public function store(PayRequestRequest $request)
     {
         //call payment Service
