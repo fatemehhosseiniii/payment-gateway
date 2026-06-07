@@ -2,6 +2,7 @@
 
 namespace App\Builders;
 
+use App\Enums\PayRequestStatus;
 use App\Enums\TransactionStatus;
 use App\Jobs\PayRequestStatusUpdateJob;
 use App\Models\Payment\Transaction;
@@ -78,16 +79,18 @@ class TransactionBuilder
 
     public function build(int|null $id = null): Transaction
     {
+        //todo: NEED REFACTOR
         //make
         $transaction = Transaction::updateOrCreate(['id' => $id ?? null], $this->getArray());
 
         //call Job for Reset pay request Status
         if ($this->status === TransactionStatus::Success) {
-            if ($transaction->payRequest->remaining_amount - $transaction->amount <= 0)
-                PayRequestStatusUpdateJob::dispatch($transaction->payRequest);
+//            if ($transaction->payRequest->remaining_amount - $transaction->amount <= 0)
+//                PayRequestStatusUpdateJob::dispatch($transaction->payRequest);
 
             $transaction->payRequest()->update([
-                'remaining_amount' => $transaction->payRequest->remaining_amount - $transaction->amount
+                'remaining_amount' => $transaction->payRequest->remaining_amount - $transaction->amount,
+                'status' => $transaction->payRequest->remaining_amount - $transaction->amount <= 0 ? PayRequestStatus::Success : PayRequestStatus::PartialFail
             ]);
         }
 
