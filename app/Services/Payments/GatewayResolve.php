@@ -2,10 +2,19 @@
 
 namespace App\Services\Payments;
 
+use Illuminate\Config\Repository;
+use Illuminate\Foundation\Application;
+
 class GatewayResolve
 {
 
-    public function resolve($gatewayKey)
+    /**
+     * Find Gateway Adapter Class for Connect to payment gate
+     * @param $gatewayKey
+     * @return Repository|Application|mixed|object|null
+     * @throws \Exception
+     */
+    public function resolve($gatewayKey): mixed
     {
         $service = config('gateways.' . $gatewayKey);
 

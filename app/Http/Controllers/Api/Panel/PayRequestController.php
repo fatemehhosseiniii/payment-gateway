@@ -9,7 +9,6 @@ use App\Models\Payment\PayRequest;
 use App\Repositories\PayRequestRepository;
 use App\Services\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Throwable;
 
 class PayRequestController extends Controller

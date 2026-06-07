@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Panel;
 use App\Enums\PayRequestStatus;
 use App\Http\Controllers\Controller;
 use App\Services\Response;
-use Illuminate\Http\Request;
 
 class PayRequestStatusController extends Controller
 {

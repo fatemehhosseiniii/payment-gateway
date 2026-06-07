@@ -7,6 +7,7 @@ use App\Services\ArrayCrypt;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class GatewayRepository
 {
@@ -18,11 +19,20 @@ class GatewayRepository
         $this->arrayCrypt = new ArrayCrypt();
     }
 
+    /**
+     * Active list for global api
+     * @return Collection
+     */
     public function getActiveList(): Collection
     {
         return Gateway::query()->where('is_active', true)->get();
     }
 
+    /**
+     * Main Gateways list for panel manager
+     * @param array $filterData
+     * @return LengthAwarePaginator
+     */
     public function getList(array $filterData): LengthAwarePaginator
     {
         $gateways = Gateway::query();
@@ -38,11 +48,26 @@ class GatewayRepository
         return $gateways->orderByDesc('created_at')->paginate(config('setting.paginate-per-page'));
     }
 
+    /**
+     * Find Gateway by custom key
+     * @param string $key
+     * @param string $value
+     * @return Model
+     */
     public function find(string $key, string $value): Model
     {
-        return Gateway::where($key, $value)->first();
+        $gateway = Gateway::where($key, $value)->where('is_active', true)->first();
+        if (!$gateway)
+            return throw new NotFoundHttpException(__('payment.gateway-not-found', ['gateway' => $value]));
+
+        return $gateway;
     }
 
+    /**
+     * Create New gateway and if exists key updated
+     * @param array $data
+     * @return Gateway
+     */
     public function create(array $data): Gateway
     {
         $data['params'] = $this->arrayCrypt->encrypt($data['params'] ?? []);
@@ -53,6 +78,12 @@ class GatewayRepository
         return $gateway;
     }
 
+    /**
+     * Update Gateway Values
+     * @param Gateway|Model $model
+     * @param array $data
+     * @return Gateway
+     */
     public function update(Gateway|Model $model, array $data): Gateway
     {
         if (isset($data['params'])) {
@@ -64,6 +95,11 @@ class GatewayRepository
         return $model;
     }
 
+    /**
+     * Remove Gateway selected
+     * @param Model $model
+     * @return void
+     */
     public function delete(Model $model): void
     {
         $model->delete();

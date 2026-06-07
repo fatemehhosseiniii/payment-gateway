@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['pay_request_id', 'amount', 'trac_code', 'refid', 'transaction_id', 'pay_date', 'pay_status', 'status'])]
+#[Fillable(['pay_request_id', 'amount', 'trac_code', 'refid', 'transaction_id', 'pay_date', 'status'])]
 class Transaction extends Model
 {
     protected function casts(): array
@@ -29,7 +29,7 @@ class Transaction extends Model
 
         self::updating(function ($model) {
             $payRequest = $model->payRequest;
-            if($payRequest){
+            if ($payRequest) {
 //                if ($model->status )
             }
         });

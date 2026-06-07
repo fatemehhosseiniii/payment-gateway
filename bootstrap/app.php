@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             fn(Request $request) => $request->is('api/*'),
         );
 
-//        $exceptions->render(fn(NotFoundHttpException $exception) => Response::error(__('errors.404'), 404));
+        $exceptions->render(fn(NotFoundHttpException $exception) => Response::error(__('errors.404'), 404));
         $exceptions->render(fn(Exception $exception) => Response::error($exception->getMessage() ?? __('errors.500'), 500));
 
     })->create();

@@ -2,5 +2,5 @@
 
 
 return [
-    'shepa' => \App\Services\Payments\Gateways\ShepaService::class,
+    'shepa' => \App\Infrastructure\Adapters\ShepaAdapter::class,
 ];

@@ -21,7 +21,6 @@ return new class extends Migration {
             $table->string('transaction_id')->nullable()->unique();
             $table->timestamp('pay_date')->nullable();
 
-            $table->string('pay_status')->nullable();
 
             $table->tinyInteger('status')->default(0);
             $table->timestamps();

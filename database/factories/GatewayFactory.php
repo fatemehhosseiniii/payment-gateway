@@ -15,7 +15,6 @@ class GatewayFactory extends Factory
             'title' => fake()->name(),
             'key' => fake()->name(),
             'params' => [],
-            'is_active' => fake()->boolean(),
         ];
     }
 }

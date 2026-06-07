@@ -15,6 +15,7 @@ class GatewaySeeder extends Seeder
         Gateway::factory()->create([
             'title' => 'Shepa',
             'key' => 'shepa',
+            'max_amount'=>1000000
         ]);
         Gateway::factory()->create([
             'title' => 'Zarinpal',

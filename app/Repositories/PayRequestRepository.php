@@ -8,6 +8,11 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class PayRequestRepository
 {
 
+    /**
+     * load Pay requests list with filtering
+     * @param array $filterData
+     * @return LengthAwarePaginator
+     */
     public function getList(array $filterData): LengthAwarePaginator
     {
         $payRequests = PayRequest::query()->with('gateway');
@@ -22,6 +27,7 @@ class PayRequestRepository
 
         return $payRequests->orderByDesc('created_at')->paginate(config('setting.paginate-per-page'));
     }
+
 
     public function create(array $data): PayRequest
     {

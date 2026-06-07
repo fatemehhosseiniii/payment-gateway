@@ -3,5 +3,5 @@
 return [
 
     '500'=>'Server error',
-    '404'=>'not found'
+    '404'=>'not found.'
 ];

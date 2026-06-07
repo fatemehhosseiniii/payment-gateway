@@ -7,10 +7,8 @@ use App\Http\Requests\Api\Panel\GatewayRequest;
 use App\Http\Resources\PaginateResource;
 use App\Models\Gateway;
 use App\Repositories\GatewayRepository;
-use App\Services\ArrayCrypt;
 use App\Services\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class GatewayController extends Controller
 {

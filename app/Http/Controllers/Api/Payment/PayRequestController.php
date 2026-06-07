@@ -6,10 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Paymeny\PayRequestRequest;
 use App\Services\Payments\PaymentService;
 use App\Services\Response;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\CircularDependencyException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PayRequestController extends Controller
 {
+
+    /**
+     * @param PayRequestRequest $request
+     * @return JsonResponse
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
+     */
     public function store(PayRequestRequest $request)
     {
         //call payment Service

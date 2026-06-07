@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Services\Payments\Gateways;
+namespace App\Infrastructure\Adapters;
 
 use App\Repositories\TransactionRepository;
-use App\Services\Payments\PaymentInterface;
 use Illuminate\Support\Facades\Log;
 use NasrinRezaei45\Shepacom\ShepaFacade;
 
-class ShepaService implements PaymentInterface
+class ShepaAdapter implements PaymentInterface
 {
+    /**
+     * @param int $amount
+     * @return array
+     */
     public function pay(int $amount): array
     {
         try {
@@ -24,7 +27,11 @@ class ShepaService implements PaymentInterface
         }
     }
 
-    public function verify(array $data)
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function verify(array $data): array
     {
         //find transaction
         $transactionRepository = new TransactionRepository();
@@ -36,7 +43,7 @@ class ShepaService implements PaymentInterface
             $result = ShepaFacade::verify($transaction->trac_code, $transaction->amount);
 
             if (!empty($result['refid']))
-                return $result;
+                return $result + ['transaction' => $transaction];
             else
                 return ['status' => 'error', 'message' => $result['message'] ?? 'Invalid payment.', 'transaction' => $transaction];
 

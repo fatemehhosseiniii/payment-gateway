@@ -2,172 +2,87 @@
 
 namespace App\Services\Payments;
 
-
-use App\Enums\PayRequestStatus;
-use App\Enums\TransactionStatus;
 use App\Models\Payment\PayRequest;
-use App\Models\Payment\Transaction;
-use App\Repositories\GatewayRepository;
-use App\Repositories\PayRequestRepository;
-use App\Repositories\TransactionRepository;
-use App\Services\Payments\Gateways\ShepaService;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\CircularDependencyException;
 
 class PaymentService
 {
-    public TransactionRepository $transactionRepository;
+
+    private PayRequest|null $payRequest = null;
+    private int|null $payAmount = null;
+    private PaymentDatabaseLogic $paymentDatabaseLogic;
 
     public function __construct()
     {
-        $this->transactionRepository = new TransactionRepository();
+        $this->paymentDatabaseLogic = new PaymentDatabaseLogic();
     }
 
+    /**
+     * make Data and Return redirect route for pyment
+     * @param array $data
+     * @return array
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
+     * @throws Exception
+     */
     public function pay(array $data): array
     {
-
+        //get payment service need
         $payService = app(GatewayResolve::class)->resolve($data['gateway_key']);
 
-        $payRequest = $this->createRequest($data);
+        //Create pay Request
+        if (!$this->payRequest)
+            $this->payRequest = $this->paymentDatabaseLogic->createRequest($data);
 
-        $result = $payService->pay($payRequest->amount - $payRequest->remaining_amount);
+        $gateway = $this->payRequest->gateway;
+        if ($gateway && !empty($gateway->max_amount) && $this->payRequest->remaining_amount >= $gateway->max_amount)
+            $this->payAmount = $gateway->max_amount;
+        else
+            $this->payAmount = $this->payRequest->remaining_amount;
+
+        //Connect pay gateway
+        $result = $payService->pay($this->payAmount);
 
         //save Transaction
         if (!empty($result['trac_code']))
-            $this->createTransaction($payRequest, $payRequest->amount - $payRequest->remaining_amount, $result['trac_code']);
+            $this->paymentDatabaseLogic->createTransaction($this->payRequest, $this->payAmount, $result['trac_code']);
 
-        if ($payRequest->remaining_amount > 0)
+        if ($this->payRequest->remaining_amount > 0)
             $result['detail']['have_more_transaction'] = true;
 
         return $result;
     }
 
+
+    /**
+     * Verify Pay request
+     * @param string $gateway
+     * @param array $data
+     * @return array
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
+     */
     public function verify(string $gateway, array $data): array
     {
         $payService = app(GatewayResolve::class)->resolve($gateway);
 
+        //send Request to verify
         $result = $payService->verify($data);
 
-        if (!empty($result['status']) && $result['status'] == 'error') {
-            $transaction = $this->failTransaction($result['transaction']);
+        //Update Transaction Status
+        list($transactionVerify, $transaction) = $this->paymentDatabaseLogic->verifyTransaction($result, $result['transaction']);
 
-            $payService = app(GatewayResolve::class)->resolve($transaction->payRequest->gateway->key);
+        //reset variables
+        $this->payRequest = $transaction->payRequest;
+        $this->payAmount = $transaction->amount;
 
-            $result = $payService->pay($transaction->amount);
-
-            //save Transaction
-            if (!empty($result['trac_code']))
-                $this->createTransaction($transaction->payRequest, $transaction->amount, $result['trac_code']);
-
-            return $result;
-        }
-        //save Transaction
-        if (!empty($result['refid']))
-            $transaction = $this->verifyTransaction($data['token'], $result);
-
-        //checked pay all Amount
-        $transaction->load('payRequest.gateway');
-
-        if ($transaction->payRequest->remaining_amount > 0) {
-
-            $payService = app(GatewayResolve::class)->resolve($transaction->payRequest->gateway->key);
-
-            if (!empty($transaction->payRequest->gateway->max_amount) && $transaction->payRequest->remaining_amount >= $transaction->payRequest->gateway->max_amount)
-                $payAmount = $transaction->payRequest->remaining_amount - $transaction->payRequest->gateway->max_amount;
-            else
-                $payAmount = $transaction->payRequest->remaining_amount;
-
-            $transaction->payRequest()->update([
-                'remaining_amount' => $transaction->payRequest->remaining_amount - $payAmount
-            ]);
-
-            $result = $payService->pay($payAmount);
-
-            //save Transaction
-            if (!empty($result['trac_code']))
-                $this->createTransaction($transaction->payRequest, $payAmount, $result['trac_code']);
-
-            return $result;
-
-        } else
-            $transaction->payRequest()->update([
-                'remaining_amount' => 0,
-                'status' => PayRequestStatus::Success
-            ]);
-
+        if (!$transactionVerify || ($transactionVerify && $this->payRequest->remaining_amount > 0))
+            return $this->pay(['gateway_key' => $transaction->payRequest->gateway->key]);
 
         return $result;
     }
 
-    private function createRequest(array $data)
-    {
-        $payRequestRepository = new PayRequestRepository();
-        $gatewayRepository = new GatewayRepository();
-
-        try {
-            //Find Gateway
-            $gateway = $gatewayRepository->find('key', $data['gateway_key']);
-            if (!empty($gateway)) {
-                unset($data['gateway_key']);
-                $data['gateway_id'] = $gateway->id;
-            }
-
-            //check max amount gateway handled
-            //todo: move Other function
-            if (!empty($gateway->max_amount) && $data['amount'] >= $gateway->max_amount)
-                $data['remaining_amount'] = $data['amount'] - $gateway->max_amount;
-
-
-            //save main request
-            return $payRequestRepository->create($data);
-
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return throw new \Exception(__('payment.gateway-not-found', ['gateway' => $data['gateway_key']]));
-        }
-
-    }
-
-    private function createTransaction(PayRequest $payRequest, $payAmount, $tracCode): void
-    {
-        //todo: Can use Builder
-        $this->transactionRepository->create([
-            'pay_request_id' => $payRequest->id,
-            'amount' => $payAmount,
-            'trac_code' => $tracCode,
-        ]);
-    }
-
-    private function verifyTransaction($tracCode, $verifyData): Transaction
-    {
-        $transaction = $this->transactionRepository->find('trac_code', $tracCode);
-        if (!$transaction)
-            throw new \Exception(__('payment.transaction-not-found'));
-
-        $this->transactionRepository->update($transaction, [
-            'refid' => $verifyData['refid'],
-            'transaction_id' => $verifyData['transaction_id'],
-            'pay_date' => Carbon::parse($verifyData['date']),
-            'pay_status' => 'success',
-            'status' => TransactionStatus::Success,
-        ]);
-
-        return $transaction;
-
-    }
-
-    private function failTransaction($transaction): Transaction
-    {
-        if (!$transaction)
-            throw new \Exception(__('payment.transaction-not-found'));
-
-        $this->transactionRepository->update($transaction, [
-            'pay_status' => 'failed',
-            'status' => TransactionStatus::Fail,
-        ]);
-
-        return $transaction;
-
-    }
 
 }

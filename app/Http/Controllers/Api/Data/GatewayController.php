@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Data;
 use App\Http\Controllers\Controller;
 use App\Repositories\GatewayRepository;
 use App\Services\Response;
-use Illuminate\Http\Request;
 
 class GatewayController extends Controller
 {
