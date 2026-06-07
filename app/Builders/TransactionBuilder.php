@@ -3,6 +3,7 @@
 namespace App\Builders;
 
 use App\Enums\TransactionStatus;
+use App\Jobs\PayRequestStatusUpdateJob;
 use App\Models\Payment\Transaction;
 use App\Repositories\TransactionRepository;
 use Carbon\Carbon;
@@ -54,36 +55,41 @@ class TransactionBuilder
         return $this;
     }
 
-    public function getArray():array
+    public function getArray(): array
     {
-        $data=[];
-        if(!empty($this->pay_request_id))
+        $data = [];
+        if (!empty($this->pay_request_id))
             $data["pay_request_id"] = $this->pay_request_id;
-        if(!empty($this->amount))
+        if (!empty($this->amount))
             $data["amount"] = $this->amount;
-        if(!empty($this->trac_code))
+        if (!empty($this->trac_code))
             $data["trac_code"] = $this->trac_code;
-        if(!empty($this->refid))
+        if (!empty($this->refid))
             $data["refid"] = $this->refid;
-        if(!empty($this->transaction_id))
+        if (!empty($this->transaction_id))
             $data["transaction_id"] = $this->transaction_id;
-        if(!empty($this->pay_date))
+        if (!empty($this->pay_date))
             $data["pay_date"] = $this->pay_date;
-        if(!empty($this->status))
+        if (!empty($this->status))
             $data["status"] = $this->status;
 
         return $data;
     }
+
     public function build(int|null $id = null): Transaction
     {
         //make
         $transaction = Transaction::updateOrCreate(['id' => $id ?? null], $this->getArray());
 
         //call Job for Reset pay request Status
-        if ($this->status === TransactionStatus::Success)
+        if ($this->status === TransactionStatus::Success) {
+            if ($transaction->payRequest->remaining_amount - $transaction->amount <= 0)
+                PayRequestStatusUpdateJob::dispatch($transaction->payRequest);
+
             $transaction->payRequest()->update([
                 'remaining_amount' => $transaction->payRequest->remaining_amount - $transaction->amount
             ]);
+        }
 
 
         return $transaction;
