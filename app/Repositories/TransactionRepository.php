@@ -2,15 +2,16 @@
 
 namespace App\Repositories;
 
+use App\Enums\TransactionStatus;
 use App\Models\Payment\Transaction;
 use Illuminate\Database\Eloquent\Model;
 
 class TransactionRepository
 {
 
-    public function find(string $key, string $value): Model
+    public function find(string $key, string $value): Model|null
     {
-        return Transaction::where($key, $value)->first();
+        return Transaction::where($key, $value)->where('status', TransactionStatus::Pending)->first();
     }
 
     public function create(array $data): Transaction
@@ -19,7 +20,8 @@ class TransactionRepository
         $transaction->refresh();
         return $transaction;
     }
-    public function update($transaction,array $data): Transaction
+
+    public function update($transaction, array $data): Transaction
     {
         $transaction->update($data);
 
