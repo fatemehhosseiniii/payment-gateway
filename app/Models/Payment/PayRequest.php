@@ -2,6 +2,7 @@
 
 namespace App\Models\Payment;
 
+use App\Enums\PayRequestStatus;
 use App\Models\Gateway;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['code', 'gateway_id', 'order_code', 'amount', 'remaining_amount', 'status', 'status_note'])]
 class PayRequest extends Model
 {
+
+    protected function casts(): array
+    {
+        return [
+            'status' => PayRequestStatus::class
+        ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'code';
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);

@@ -35,7 +35,7 @@ class GatewayRepository
         if (isset($filterData['is_active'])) {
             $gateways->where('is_active', $filterData['is_active']);
         }
-        return $gateways->paginate(config('setting.paginate-per-page'));
+        return $gateways->orderByDesc('created_at')->paginate(config('setting.paginate-per-page'));
     }
 
     public function find(string $key, string $value): Model
