@@ -2,12 +2,8 @@
 
 namespace App\Builders;
 
-use App\Enums\PayRequestStatus;
 use App\Enums\TransactionStatus;
-use App\Events\PayRequestProcessed;
-use App\Jobs\PayRequestStatusUpdateJob;
 use App\Models\Payment\Transaction;
-use App\Repositories\TransactionRepository;
 use Carbon\Carbon;
 
 class TransactionBuilder

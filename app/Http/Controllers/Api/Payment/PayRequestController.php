@@ -142,7 +142,6 @@ class PayRequestController extends Controller
         //return Result
         if (!empty($result['refid']) || !empty($result['status'])) {
 
-            $result['detail']['pay_status'] = $request->status;
             if (!empty($result['redirect_route']))
                 return Response::success(['redirect_route' => $result['redirect_route']] + ($result['detail'] ?? []));
             else

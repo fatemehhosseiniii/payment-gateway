@@ -2,6 +2,9 @@
 
 namespace App\Infrastructure\Adapters;
 
+use App\Builders\PaymentResponse\ErrorPaymentResponse;
+use App\Builders\PaymentResponse\SuccessPaymentResponse;
+use App\Builders\PaymentResponse\SuccessVerifyResponse;
 use App\Repositories\TransactionRepository;
 use Illuminate\Support\Facades\Log;
 use NasrinRezaei45\Shepacom\ShepaFacade;
@@ -10,9 +13,9 @@ class ShepaAdapter implements PaymentInterface
 {
     /**
      * @param int $amount
-     * @return array
+     * @return SuccessPaymentResponse|ErrorPaymentResponse
      */
-    public function pay(int $amount): array
+    public function pay(int $amount): SuccessPaymentResponse|ErrorPaymentResponse
     {
         try {
             $result = ShepaFacade::send($amount, '', '', '');
@@ -20,18 +23,21 @@ class ShepaAdapter implements PaymentInterface
             $tracCode = explode('/', $result);
             $tracCode = $tracCode[count($tracCode) - 1];
 
-            return ['status' => 'success', 'redirect_route' => $result, 'trac_code' => $tracCode];
+            return (new SuccessPaymentResponse())
+                ->setTracCode($tracCode)
+                ->setRedirectRoute($result);
+
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
-            return ['status' => 'error', 'message' => $exception->getMessage()];
+            return (new ErrorPaymentResponse())->setMessage($exception->getMessage());
         }
     }
 
     /**
      * @param array $data
-     * @return array
+     * @return ErrorPaymentResponse
      */
-    public function verify(array $data): array
+    public function verify(array $data): SuccessVerifyResponse|ErrorPaymentResponse
     {
         //find transaction
         $transactionRepository = new TransactionRepository();
@@ -42,13 +48,18 @@ class ShepaAdapter implements PaymentInterface
 
             $result = ShepaFacade::verify($transaction->trac_code, $transaction->amount);
 
-            if (!empty($result['refid']))
-                return $result + ['transaction' => $transaction];
+            if (!empty($result['refid'])){
+                return (new SuccessVerifyResponse())
+                    ->setRefid($result['refid'])
+                    ->setTransactionId($result['transaction_id'])
+                    ->setDate($result['date'])
+                    ->setTransaction($transaction);
+            }
             else
-                return ['status' => 'error', 'message' => $result['message'] ?? 'Invalid payment.', 'transaction' => $transaction];
+                return (new ErrorPaymentResponse())->setMessage(__('payment.payment-invalid'))->setTransaction($transaction ?? []);
 
         } else {
-            return ['status' => 'error', 'message' => 'Invalid payment.', 'transaction' => $transaction ?? null];
+            return (new ErrorPaymentResponse())->setMessage(__('payment.payment-invalid'))->setTransaction($transaction ?? []);
         }
 
     }

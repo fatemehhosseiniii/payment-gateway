@@ -2,7 +2,11 @@
 
 namespace App\Infrastructure\Adapters;
 
+use App\Builders\PaymentResponse\ErrorPaymentResponse;
+use App\Builders\PaymentResponse\SuccessPaymentResponse;
+use App\Builders\PaymentResponse\SuccessVerifyResponse;
 use App\Repositories\TransactionRepository;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use NasrinRezaei45\Shepacom\ShepaFacade;
@@ -24,9 +28,9 @@ class ZarinpalAdapter implements PaymentInterface
 
     /**
      * @param int $amount
-     * @return array
+     * @return SuccessPaymentResponse|ErrorPaymentResponse
      */
-    public function pay(int $amount): array
+    public function pay(int $amount): SuccessPaymentResponse|ErrorPaymentResponse
     {
         try {
 
@@ -41,25 +45,29 @@ class ZarinpalAdapter implements PaymentInterface
             ]);
 
             if (!$client->successful() || empty($client->json()['data']['authority'])) {
-                return ['status' => 'error', 'message' => $client->json()['errors']['message'] ?? __('payment.gateway-error')];
+                return (new ErrorPaymentResponse())->setMessage($client->json()['errors']['message'] ?? __('payment.gateway-error'));
             }
 
             $authority = $client->json()['data']['authority'];
 
             $paymentRoute = $this->paymentUrl . '/' . $authority;
 
-            return ['status' => 'success', 'redirect_route' => $paymentRoute, 'trac_code' => $authority];
+            return (new SuccessPaymentResponse())
+                ->setTracCode($authority)
+                ->setRedirectRoute($paymentRoute);
+
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
-            return ['status' => 'error', 'message' => $exception->getMessage()];
+            return (new ErrorPaymentResponse())->setMessage($exception->getMessage());
         }
     }
 
     /**
      * @param array $data
-     * @return array
+     * @return SuccessVerifyResponse|ErrorPaymentResponse
+     * @throws ConnectionException
      */
-    public function verify(array $data): array
+    public function verify(array $data): \App\Builders\PaymentResponse\SuccessVerifyResponse|ErrorPaymentResponse
     {
         //find transaction
         $transactionRepository = new TransactionRepository();
@@ -78,23 +86,21 @@ class ZarinpalAdapter implements PaymentInterface
             ]);
 
             if (!$client->successful())
-                return ['status' => 'error', 'message' => 'Invalid payment.', 'transaction' => $transaction];
+                return (new ErrorPaymentResponse())->setMessage(__('payment.payment-invalid'))->setTransaction($transaction);
+
             $response = $client->json()['data'] ?? [];
 
             if (!empty($response['message']) && $response['message'] == 'Paid')
-                return [
-                    'status' => 'success',
-                    'refid' => $response['ref_id'],
-                    'transaction_id' => $response['ref_id'],
-                    'date' => now()->toDateTimeString(),
-
-                    'transaction' => $transaction
-                ];
+                return (new SuccessVerifyResponse())
+                    ->setRefid($response['ref_id'])
+                    ->setTransactionId($response['ref_id'])
+                    ->setDate(now()->toDateTimeString())
+                    ->setTransaction($transaction);
             else
-                return ['status' => 'error', 'message' => $result['message'] ?? 'Invalid payment.', 'transaction' => $transaction];
+                return (new ErrorPaymentResponse())->setMessage(__('payment.payment-invalid'))->setTransaction($transaction);
 
         } else {
-            return ['status' => 'error', 'message' => 'Invalid payment.', 'transaction' => $transaction ?? null];
+            return (new ErrorPaymentResponse())->setMessage(__('payment.payment-invalid'))->setTransaction($transaction ?? []);
         }
 
     }

@@ -44,7 +44,7 @@ class PaymentService
             $this->payAmount = $this->payRequest->remaining_amount;
 
         //Connect pay gateway
-        $result = $payService->pay($this->payAmount);
+        $result = (array)$payService->pay($this->payAmount);
 
         //save Transaction
         if (!empty($result['trac_code']))
@@ -70,7 +70,7 @@ class PaymentService
         $payService = app(GatewayResolve::class)->resolve($gateway);
 
         //send Request to verify
-        $result = $payService->verify($data);
+        $result = (array)$payService->verify($data);
 
         if (empty($result['transaction']))
             throw new Exception(__('payment.transaction-not-found'));
