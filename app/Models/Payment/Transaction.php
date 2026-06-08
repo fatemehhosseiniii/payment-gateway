@@ -3,6 +3,7 @@
 namespace App\Models\Payment;
 
 use App\Enums\TransactionStatus;
+use App\Events\PayRequestProcessed;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,14 +24,13 @@ class Transaction extends Model
     }
 
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
-        self::updating(function ($model) {
-            $payRequest = $model->payRequest;
-            if ($payRequest) {
-//                if ($model->status )
+        self::updated(function ($model) {
+            if ($model->isDirty('status')) {
+                PayRequestProcessed::dispatch($model->payRequest);
             }
         });
     }

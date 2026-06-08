@@ -77,6 +77,7 @@ class PaymentDatabaseLogic
         $transactionBuilder->build($transaction->id);
 
         $transaction->load('payRequest.gateway');
+
         return [$resultVerify, $transaction];
     }
 

@@ -71,6 +71,9 @@ class PaymentService
         //send Request to verify
         $result = $payService->verify($data);
 
+        if (empty($result['transaction']))
+            throw new Exception(__('payment.transaction-not-found'));
+
         //Update Transaction Status
         list($transactionVerify, $transaction) = $this->paymentDatabaseLogic->verifyTransaction($result, $result['transaction']);
 

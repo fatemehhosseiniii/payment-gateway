@@ -40,7 +40,8 @@ php artisan migrate --seed
 ```
 
 ### 5. Start Development Server
-
+    
+    Start Xampp (Apache and MySql)
 ```bash
 php artisan serve
 ```

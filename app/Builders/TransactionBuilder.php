@@ -4,6 +4,7 @@ namespace App\Builders;
 
 use App\Enums\PayRequestStatus;
 use App\Enums\TransactionStatus;
+use App\Events\PayRequestProcessed;
 use App\Jobs\PayRequestStatusUpdateJob;
 use App\Models\Payment\Transaction;
 use App\Repositories\TransactionRepository;
@@ -85,12 +86,9 @@ class TransactionBuilder
 
         //call Job for Reset pay request Status
         if ($this->status === TransactionStatus::Success) {
-//            if ($transaction->payRequest->remaining_amount - $transaction->amount <= 0)
-//                PayRequestStatusUpdateJob::dispatch($transaction->payRequest);
 
             $transaction->payRequest()->update([
                 'remaining_amount' => $transaction->payRequest->remaining_amount - $transaction->amount,
-                'status' => $transaction->payRequest->remaining_amount - $transaction->amount <= 0 ? PayRequestStatus::Success : PayRequestStatus::PartialFail
             ]);
         }
 
