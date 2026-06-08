@@ -47,9 +47,7 @@ class PayRequestController extends Controller
                 ]
             )
         ),
-
         tags: ['Payment'],
-
         responses: [
             new OA\Response(
                 response: 200,
@@ -141,14 +139,14 @@ class PayRequestController extends Controller
         $service = new PaymentService();
         $result = $service->verify($gateway, $request->all());
 
-        return [$result,'susses'=>'here'];
         //return Result
-        if (isset($result['status']) && $result['status'] == 'success') {
+        if (!empty($result['refid']) || !empty($result['status'])) {
 
+            $result['detail']['pay_status'] = $request->status;
             if (!empty($result['redirect_route']))
                 return Response::success(['redirect_route' => $result['redirect_route']] + ($result['detail'] ?? []));
             else
-                return Response::success();
+                return Response::success($result['detail'] ?? []);
         }
 
         return Response::error($result['message'] ?? __('errors.500'));

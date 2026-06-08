@@ -20,6 +20,7 @@ class PayRequestResource extends JsonResource
             'code' => $payReq->code,
             'gateway' => $this->whenLoaded('gateway', fn() => $payReq->gateway->title),
             'amount' => $payReq->amount,
+            'remaining_amount' => $payReq->remaining_amount,
             'order_code' => $payReq->order_code,
 
             'created_at' => $payReq->created_at,

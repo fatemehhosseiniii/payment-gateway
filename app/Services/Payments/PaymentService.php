@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments;
 
+use App\Http\Resources\Payment\TransactionResource;
 use App\Models\Payment\PayRequest;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -50,7 +51,7 @@ class PaymentService
             $this->paymentDatabaseLogic->createTransaction($this->payRequest, $this->payAmount, $result['trac_code']);
 
         if ($this->payRequest->remaining_amount > 0)
-            $result['detail']['have_more_transaction'] = true;
+            $result['detail']['remaining_amount'] = $this->payRequest->remaining_amount;
 
         return $result;
     }
@@ -83,6 +84,11 @@ class PaymentService
 
         if (!$transactionVerify || ($transactionVerify && $this->payRequest->remaining_amount > 0))
             return $this->pay(['gateway_key' => $transaction->payRequest->gateway->key]);
+
+        //set transaction resource detail
+        $result['transaction']->refresh();
+        $result['detail']['transaction'] = (new TransactionResource($result['transaction']))->resolve();
+        unset($result['transaction']);
 
         return $result;
     }
