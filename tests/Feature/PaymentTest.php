@@ -2,62 +2,91 @@
 
 namespace Tests\Feature;
 
-use App\Infrastructure\Adapters\PaymentInterface;
-use App\Infrastructure\Adapters\ShepaAdapter;
-use App\Models\Gateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
-use Mockery;
+use NasrinRezaei45\Shepacom\ShepaFacade;
 use Tests\TestCase;
 
 class PaymentTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected bool $seed = true;
 
-    private string $transactionToken;
-
-    public function test_minimum_amount_payment()
+    public function test_payment_and_verify_successfully()
     {
+        $amount = fake()->numberBetween(10000, 999999);
+        $tracCode = fake()->uuid();
+        // Mock pay request
+        ShepaFacade::shouldReceive('send')
+            ->once()
+            ->andReturn(
+                'https://payment.shepa.com/pay/' . $tracCode
+            );
+
 
         $response = $this->postJson('/api/payment/pay-request', [
-            'amount' => 10000,
+            'amount' => $amount,
             'order_code' => fake()->randomNumber(6),
             'gateway_key' => 'shepa',
         ]);
 
-        $tracCode = explode('/', $response->json('data.redirect_route'));
-        $tracCode = $tracCode[count($tracCode) - 1];
-        $this->transactionToken = $tracCode;
+        $response->assertOk();
 
-        $response->assertStatus(200);
-
-
-        $payment = Mockery::mock(ShepaAdapter::class);
-
-        $payment->shouldReceive('verify')
+        // Mock verify request
+        ShepaFacade::shouldReceive('verify')
             ->once()
-            ->andReturn(['token'=>$tracCode,'status'=>'success']);
-//
+            ->with($tracCode, $amount)
+            ->andReturn([
+                'refid' => '123456',
+                'transaction_id' => '123456',
+                'date' => now()->toDateTimeString(),
+            ]);
 
-        $responseVerify = $this->get('/api/payment/verify/shepa', [
-            'token' => Str::uuid(),
-            'status' => 'success',
-        ]);
+        // Verify Payment
+        $responseVerify = $this->getJson(
+            '/api/payment/verify/shepa?token=' . $tracCode . '&status=success'
+        );
 
-        $responseVerify->ddBody();
+        $responseVerify
+            ->assertOk()
+            ->assertJsonStructure([
+                'status',
+                'data',
+            ]);
     }
 
-//    public function test_successfully_verified()
-//    {
-//
-////        $response->assertOk()
-////            ->assertJson([
-////                'status' => 'success',
-////            ]);
-//    }
-}
+    public function test_payment_and_verify_failed()
+    {
+        $amount = fake()->numberBetween(10000, 999999);
+        $tracCode = fake()->uuid();
 
+        ShepaFacade::shouldReceive('send')
+            ->twice()
+            ->andReturn(
+                'https://payment.shepa.com/pay/' . $tracCode,
+                'https://payment.shepa.com/pay/' . $tracCode . '_2'
+            );
+
+        $this->postJson('/api/payment/pay-request', [
+            'amount' => $amount,
+            'order_code' => fake()->randomNumber(6),
+            'gateway_key' => 'shepa',
+        ])->assertOk();
+
+        // مهم: verify نباید صدا زده شود
+        ShepaFacade::shouldReceive('verify')->never();
+
+        $responseVerify = $this->getJson(
+            '/api/payment/verify/shepa?token=' . $tracCode . '&status=failed'
+        );
+
+        $responseVerify->assertOk();
+
+        $responseVerify
+            ->assertOk()
+            ->assertJsonStructure([
+                'status',
+                'data',
+            ]);
+    }
+}

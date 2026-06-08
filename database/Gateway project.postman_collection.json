@@ -1,0 +1,459 @@
+{
+  "info": {
+    "_postman_id": "fe50b00c-8d81-439e-b32f-465aa34f2d64",
+    "name": "Gateway project",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55532517",
+    "_collection_link": "https://go.postman.co/collection/55532517-fe50b00c-8d81-439e-b32f-465aa34f2d64?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"admin@gateway.com\",\r\n    \"password\":\"password\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pay",
+      "item": [
+        {
+          "name": "Active gateways",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/data/gateways",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "data",
+                "gateways"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pay request Save",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"amount\": 1500000,\r\n    \"order_code\": \"2237\",\r\n    \"gateway_key\": \"shepa\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/payment/pay-request",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "payment",
+                "pay-request"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "gateways",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\":\"شپا\",\r\n    \"key\":\"ddddd\",\r\n    \"params\":{\r\n        \"key\":\"testKey\"\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/panel/gateways",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "gateways"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/panel/gateways",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "gateways"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"زرین پال\",\r\n    \"key\": \"zarinpal\",\r\n    \"params\": {\r\n        \"key\": \"testKey\"\r\n    },\r\n    \"is_active\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/panel/gateways/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "gateways",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update (Just Status)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"is_active\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/panel/gateways/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "gateways",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"شپا\",\r\n    \"key\": \"shepa\",\r\n    \"params\": {\r\n        \"key\": \"testKey\"\r\n    },\r\n    \"is_active\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/panel/gateways/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "gateways",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Pay request status values",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/panel/pay-request-statuses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "pay-request-statuses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/panel/pay-requests",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "pay-requests"
+              ],
+              "query": [
+                {
+                  "key": "order_code",
+                  "value": "123",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Detail",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/panel/pay-requests/102",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "panel",
+                "pay-requests",
+                "102"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
