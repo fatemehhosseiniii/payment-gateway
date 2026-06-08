@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'zarinpal' => [
+        'driver' => env('ZARINPAL_DRIVER'), //sandbox OR payment
+        'merchant-id' => env('MERCHABT_ID'),
+        'callback-url' => env('ZARINPAL_CALLBACK'),
+
+        'sandbox-request-url' => env('SANDBOX_ZARINPAL_REQUEST_URL'),
+        'sandbox-pay-url' => env('SANDBOX_ZARINPAL_PAY_URL'),
+        'sandbox-verify-url' => env('SANDBOX_ZARINPAL_VERIFY_URL'),
+
+        'payment-request-url' => env('ZARINPAL_REQUEST_URL'),
+        'payment-pay-url' => env('ZARINPAL_PAY_URL'),
+        'payment-verify-url' => env('ZARINPAL_VERIFY_URL'),
+    ]
+
 ];

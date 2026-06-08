@@ -41,6 +41,17 @@ SHEPACOM_API_KEY=test
 SHEPACOM_CALLBACK=http://localhost:8000/api/payment/verify/shepa
 SANDBOX_SHEPA_CALLBACK=http://localhost:8000/api/payment/verify/shepa
 
+ZARINPAL_DRIVER=sandbox
+MERCHABT_ID="12345678-1234-1234-1234-123456789123"
+ZARINPAL_CALLBACK=http://localhost:8000/api/payment/verify/zarinpal
+
+SANDBOX_ZARINPAL_REQUEST_URL=https://sandbox.zarinpal.com/pg/v4/payment/request.json
+ZARINPAL_REQUEST_URL=https://payment.zarinpal.com/pg/v4/payment/request.json
+SANDBOX_ZARINPAL_PAY_URL=https://sandbox.zarinpal.com/pg/StartPay
+ZARINPAL_PAY_URL=https://payment.zarinpal.com/pg/StartPay
+SANDBOX_ZARINPAL_VERIFY_URL=https://sandbox.zarinpal.com/pg/v4/payment/verify.json
+ZARINPAL_VERIFY_URL=https://payment.zarinpal.com/pg/v4/payment/verify.json
+
 ```
 
 Then update the `.env` file with your database and application settings.

@@ -26,7 +26,7 @@ class PayRequestRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'integer', 'min:1000'],
-            'order_code' => ['required', 'integer', 'digits_between:1,10',Rule::unique('pay_requests','order_code')->whereNotIn('status',[PayRequestStatus::Expired,PayRequestStatus::Fail])],
+            'order_code' => ['required', 'integer', 'digits_between:1,10',],
             'gateway_key' => ['required', 'string', 'exists:gateways,key'],
         ];
     }

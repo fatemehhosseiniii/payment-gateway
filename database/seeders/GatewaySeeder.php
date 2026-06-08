@@ -20,6 +20,7 @@ class GatewaySeeder extends Seeder
         Gateway::factory()->create([
             'title' => 'Zarinpal',
             'key' => 'zarinpal',
+            'max_amount'=>1000000
         ]);
     }
 }
