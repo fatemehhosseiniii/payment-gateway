@@ -247,6 +247,11 @@ class PayRequestController extends Controller
                                             example: 1500000
                                         ),
                                         new OA\Property(
+                                            property: 'remaining_amount',
+                                            type: 'integer',
+                                            example: 500000
+                                        ),
+                                        new OA\Property(
                                             property: 'order_code',
                                             type: 'integer',
                                             example: 124211

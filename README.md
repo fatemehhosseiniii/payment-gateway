@@ -51,7 +51,14 @@ php artisan serve
 To execute scheduled tasks locally:
 
 
-### 7. Generate Swagger docs
+### 7. Run Job queue For Run Event
+
+```bash
+php artisan queue:work
+```
+
+
+### 8. Generate Swagger docs
 
 You can see docs in /api/documentation
 

@@ -69,9 +69,9 @@ class PayRequestController extends Controller
                                     example: 'https://sandbox.shepa.com/v1/dc3006...............16a9235d'
                                 ),
                                 new OA\Property(
-                                    property: 'have_more_transaction',
-                                    type: 'boolean',
-                                    example: true
+                                    property: 'remaining_amount',
+                                    type: 'integer',
+                                    example: 1000000
                                 ),
                             ],
                             type: 'object'

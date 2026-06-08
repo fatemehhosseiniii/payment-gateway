@@ -1077,6 +1077,10 @@
                                                             "type": "integer",
                                                             "example": 1500000
                                                         },
+                                                        "remaining_amount": {
+                                                            "type": "integer",
+                                                            "example": 500000
+                                                        },
                                                         "order_code": {
                                                             "type": "integer",
                                                             "example": 124211
@@ -1328,9 +1332,9 @@
                                                     "format": "uri",
                                                     "example": "https://sandbox.shepa.com/v1/dc3006...............16a9235d"
                                                 },
-                                                "have_more_transaction": {
-                                                    "type": "boolean",
-                                                    "example": true
+                                                "remaining_amount": {
+                                                    "type": "integer",
+                                                    "example": 1000000
                                                 }
                                             },
                                             "type": "object"
