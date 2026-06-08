@@ -67,7 +67,7 @@ class ZarinpalAdapter implements PaymentInterface
      * @return SuccessVerifyResponse|ErrorPaymentResponse
      * @throws ConnectionException
      */
-    public function verify(array $data): \App\Builders\PaymentResponse\SuccessVerifyResponse|ErrorPaymentResponse
+    public function verify(array $data): SuccessVerifyResponse|ErrorPaymentResponse
     {
         //find transaction
         $transactionRepository = new TransactionRepository();
