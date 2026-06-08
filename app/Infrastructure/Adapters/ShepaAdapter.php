@@ -35,7 +35,7 @@ class ShepaAdapter implements PaymentInterface
     {
         //find transaction
         $transactionRepository = new TransactionRepository();
-        $transaction = $transactionRepository->find('trac_code', $data['token']);
+        $transaction = $transactionRepository->find('trac_code', $data['token'] ?? '');
 
 
         if (isset($data['status']) && ($data['status'] == "success") && $transaction) {
